@@ -5,7 +5,7 @@ import numpy as np
 
 def viewResults(count, images, titles):
     for i in range(count):
-        plt.subplot(2,2,i+1),plt.imshow(images[i], 'gray')
+        plt.subplot(2, 2, i+1), plt.imshow(images[i], 'gray')
         plt.title(titles[i])
         plt.xticks([]), plt.yticks([])
     plt.show()
@@ -32,22 +32,23 @@ def skeletization(img):
 
 # оргигинальное изображение
 originalImage = cv2.imread('./fingers/101_2.tif', 0)
+image_height, image_width = originalImage.shape
 # бинаризируем изображение
-binaryImg = cv2.adaptiveThreshold(originalImage, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-# нормализуем изображение с помощью вычисления гистограмы
-hist = cv2.calcHist([binaryImg], [0], None, [256], [0, 256])
+# binaryImg = cv2.adaptiveThreshold(originalImage, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+# нормализуем изображение
+hist = cv2.equalizeHist(originalImage)
+# разобьём всё изображение на блоки
+block = hist[0:240, 0:320]
 # поиск главных компонент методом PCA
-mean, eigenVectors = cv2.PCACompute(hist, np.mean(hist, 0))
-print(mean, eigenVectors)
+# mean, eigenVectors = cv2.PCACompute(originalImage, np.mean(originalImage, 0))
 # улучшение изображения с помощью фильтра Габора
-g_kernel = cv2.getGaborKernel((11, 11), 8.0, np.pi/4, 10.0, 0.5, 0)
-filtered_image = cv2.filter2D(binaryImg, cv2.CV_8UC3, g_kernel)
+g_kernel = cv2.getGaborKernel((11, 11), 8.0, 0, 10.0, 0.5, 0)
+filtered_image = cv2.filter2D(hist, cv2.CV_8UC3, g_kernel)
 
-skelet = skeletization(filtered_image)
-cv2.imshow('gabor kernel (resized)', skelet)
+cv2.imshow('block', originalImage)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-images = [originalImage, binaryImg, skelet, filtered_image]
-titles = ['Оригинал', 'Бинарное', 'skel', 'gabor']
+images = [originalImage, filtered_image]
+titles = ['Оригинал', 'gabor']
 viewResults(len(images), images, titles)
