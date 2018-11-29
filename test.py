@@ -10,15 +10,16 @@ MIN_POINTS = 2
 THRESHOLD = 50
 
 IMG_WIDTH = 480
-BLOCK_WIDTH = 128
+BLOCK_WIDTH = 240
 IMG_HEIGHT = 640
-BLOCK_HEIGHT = 128
-ACCURACY = 0.03
+BLOCK_HEIGHT = 160
 
 
 def pcaAngle(img):
     indicesY, indicesX = np.where(img < THRESHOLD)
     points = np.column_stack((indicesX, indicesY)).astype(np.float64)
+    if points.shape[0] < MIN_POINTS:
+        return 0.0
 
     mean = np.empty((0))
     mean, eigenvectors, eigenvalues = cv2.PCACompute2(points, mean)
@@ -38,10 +39,6 @@ def gaborize(img, angle):
     return filtered_image
 
 
-def findGoodBlock(blocks, angle):
-    for block in blocks:
-        pcaAngle(block)
-
 
 def splitImg2blocks(img):
     xs = range(IMG_WIDTH // BLOCK_WIDTH)
@@ -55,9 +52,19 @@ def splitImg2blocks(img):
     return blocks
 
 
+def combineBlockAngle(pair):
+    blocks, angle = pair
+    return list(map(lambda block: [block, angle], blocks))
+
+
+def calcGoodBlock(listPairs):
+    absAngle = list(map(lambda pair: [pair[0], abs(pair[1] - pcaAngle(pair[0]))], listPairs))
+    return min(absAngle, key=lambda pair: pair[1])
+
+
 # оргигинальное изображение
 originalImage = cv2.imread('./fingers/101_1.tif', cv2.IMREAD_GRAYSCALE)
-
+#
 # углы поворота в ГРАДУСАХ
 angles = [0, 23, 45, 68, 90, 113, 135, 158]
 
@@ -66,16 +73,18 @@ gaborized_blocks = []
 
 # создаём набор блоков каждого изображения на каждый угол
 for angle in angles:
-    img = gaborize(equalized, np.deg2rad(angle))
+    img = cv2.bitwise_not(gaborize(equalized, np.deg2rad(angle)))
     blocks = splitImg2blocks(img)
     gaborized_blocks.append([blocks, np.deg2rad(angle)])
 
 # TODO нужно сдлетаь функцию, котороая к каждому блоку картинки в пару прикрепит угол на который этот блок был отфильтрован.
 # TODO Потом эти пары [Блок угол] нужно зипнуть, и получить [[[block11 angle11], [block12, angle12], ...], [[block21 angle21], [block22, angle22], ...], ...].
 # TODO В итоге можно будет проходиться по всем первым блокам всех 8-ми картинок и находить самый подходящий элемент.
-for pair in gaborized_blocks:
-    blocks, angle = pair
 
+zipped_blocks = list(zip(*list(map(combineBlockAngle, gaborized_blocks))))
+goodBlocks = list(map(calcGoodBlock, zipped_blocks))
+print(goodBlocks[7])
+cv2.imshow('block', goodBlocks[6][0])
 # отдельный блок для тестов
 """
 block = equalized[blockHeight*TEST_BLOCK_H:(blockHeight*TEST_BLOCK_H+blockHeight), blockWidth*TEST_BLOCK_W:(blockWidth*TEST_BLOCK_W+blockWidth)]
