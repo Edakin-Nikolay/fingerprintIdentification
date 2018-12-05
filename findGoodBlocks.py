@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from math import atan2
+from copy import copy
 
 # константы
 TEST_BLOCK_H = 1
@@ -41,17 +42,15 @@ def gaborize(img, angle):
     return filtered_image
 
 
-
-def splitImg2blocks(img, xs=0, ys=0):
-    if xs == 0 & ys == 0:
-        xs = range(IMG_WIDTH // BLOCK_WIDTH)
-        ys = range(IMG_HEIGHT // BLOCK_HEIGHT)
+def splitImg2blocks(img, xs, ys, imgWidth=IMG_WIDTH, imgHeight=IMG_HEIGHT):
+    blockWidth = imgWidth // xs
+    blockHeight = imgHeight // ys
     blocks = []
-    for x in xs:
-        for y in ys:
-            imgY = y * BLOCK_HEIGHT
-            imgX = x * BLOCK_WIDTH
-            blocks.append(img[imgY:(imgY+BLOCK_HEIGHT), imgX:(imgX+BLOCK_WIDTH)])
+    for x in range(xs):
+        for y in range(ys):
+            imgY = y * blockHeight
+            imgX = x * blockWidth
+            blocks.append(img[imgY:(imgY+blockHeight), imgX:(imgX+blockWidth)])
     return blocks
 
 
@@ -74,17 +73,17 @@ gaborized_blocks = []
 # создаём набор блоков каждого изображения на каждый угол
 for angle in ANGLES:
     img = cv2.bitwise_not(gaborize(equalized, np.deg2rad(angle)))
-    blocks = splitImg2blocks(img)
+    blocks = splitImg2blocks(img, 2, 4)
     gaborized_blocks.append([blocks, np.deg2rad(angle)])
 
 zipped_blocks = list(zip(*list(map(combineBlockAngle, gaborized_blocks))))
 blocksAndAngle = list(map(calcGoodBlock, zipped_blocks))
 goodBlocks = list(map(lambda pair: pair[0], blocksAndAngle))
 
-print(len(goodBlocks))
-cv2.imshow('block', goodBlocks[2])
-equalized2 = equalized
+# print(len(goodBlocks))
+# cv2.imshow('block', goodBlocks[2])
 """"
+equalized2 = equalized
 for x in range(2):
     for y in range(4):
         imgY = y * BLOCK_HEIGHT
@@ -121,4 +120,4 @@ for x in xs:
 # binaryImg = cv2.adaptiveThreshold(cv2.bitwise_not(img), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
 cv2.imshow('equalized2', equalized2)
 """
-cv2.waitKey()
+# cv2.waitKey()
