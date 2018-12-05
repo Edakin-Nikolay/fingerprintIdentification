@@ -42,8 +42,10 @@ class TestFindGoodBlocks(unittest.TestCase):
         self.assertEqual(res[3][3][1], 60)
         self.assertEqual(res[3][2][0][0][0], 1)
         listZip = list(zip(*res))
-        self.assertEqual(len(listZip[0]), 6)
+        self.assertEqual(len(listZip[5]), 6)
+        print(listZip[4])
 
+# TODO написать и протестировать функцию сбора двумерного массива (изображения) из одномерного массива блоков для этого изображения.
 
 if __name__ == '__main__':
     unittest.main()

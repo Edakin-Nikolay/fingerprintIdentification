@@ -81,9 +81,9 @@ blocksAndAngle = list(map(calcGoodBlock, zipped_blocks))
 goodBlocks = list(map(lambda pair: pair[0], blocksAndAngle))
 
 # print(len(goodBlocks))
-# cv2.imshow('block', goodBlocks[2])
-""""
+# cv2.imshow('filtered', goodBlocks[6])
 equalized2 = equalized
+""""
 for x in range(2):
     for y in range(4):
         imgY = y * BLOCK_HEIGHT
@@ -93,9 +93,9 @@ for x in range(2):
         equalized2[imgY:(imgY+BLOCK_HEIGHT), imgX:(imgX+BLOCK_WIDTH)] = goodBlocks[x + y][0]
 """
 # cv2.imshow('equalized', equalized2)
-# cv2.imshow('equalized', equalized2[0:BLOCK_HEIGHT, 0:BLOCK_WIDTH])
+# cv2.imshow('equalizedddd', equalized2[2*BLOCK_HEIGHT:(2*BLOCK_HEIGHT+BLOCK_HEIGHT), 1*BLOCK_WIDTH:(1*BLOCK_WIDTH+BLOCK_WIDTH)])
 # print('block', len(goodBlocks[0][0]))
-# cv2.imshow('block', goodBlocks[0][0])
+# cv2.imshow('block', goodBlocks[6])
 # cv2.imshow('res', equalized2)
 # отдельный блок для тестов
 """
