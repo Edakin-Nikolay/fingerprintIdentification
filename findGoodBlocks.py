@@ -64,6 +64,20 @@ def calcGoodBlock(listPairs):
     return min(absAngle, key=lambda pair: pair[1])
 
 
+def cutAngles(blocks):
+    return list(map(lambda pair: pair[0], blocks))
+
+
+def makeImage(blocks, height):
+    res = []
+    for x in range(height):
+        line = []
+        for y in range(x, len(blocks), height):
+            line.append(blocks[y])
+        res.append((np.array(list(zip(*(np.array(line)))))))
+    return np.array(list(map(lambda lines: list(map(np.ndarray.flatten, lines)), res)))
+
+
 # оргигинальное изображение
 originalImage = cv2.imread('./fingers/101_1.tif', cv2.IMREAD_GRAYSCALE)
 
